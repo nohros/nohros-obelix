@@ -1,4 +1,4 @@
-Attribute VB_Name = "MustCompress"
+Attribute VB_Name = "ObelixCompress"
 ' Copyright (c) 2010 Nohros Systems Inc.
 ' Copyright (c) 2003 Dermot Balson.
 '
@@ -76,14 +76,14 @@ Sub Ari(InBytes() As Byte, OutBytes() As Byte, Optional Debugging As Boolean)
     Dim i As Long, j As Long, k As Long, bNo As Long
     Dim L As Double, R As Double
     Dim rr As Double, w As Long
-    Dim u As Long, v As Single, y As Long
-    Dim n&
+    Dim u As Long, V As Single, y As Long
+    Dim N&
     Dim nonFF As Byte, nFF As Long
     Dim LastProbUpdate As Long
     Dim BeenHereBefore As Boolean, BB As Byte
     
-    n = UBound(InBytes)
-    ReDim OutBytes(n * 2 + 3)
+    N = UBound(InBytes)
+    ReDim OutBytes(N * 2 + 3)
     
     P(0) = StartP
     cumP(0) = P(0)
@@ -100,7 +100,7 @@ Sub Ari(InBytes() As Byte, OutBytes() As Byte, Optional Debugging As Boolean)
     L = 0 'left hand value
     R = B32
     
-    For i = 1 To n
+    For i = 1 To N
       bNo = InBytes(i)
       rr = Int(R / cumP(255))
       L = L + rr * cumP(bNo - 1)
@@ -151,11 +151,11 @@ Sub Ari(InBytes() As Byte, OutBytes() As Byte, Optional Debugging As Boolean)
         'every 1000 or so steps, divide all the values by 2 to "age" them and give more weight to
         'subsequent items
         If cumStep > cumDiv Then 'age the stats
-          v = 1 / AdjustFactor
-            If P(0) < v Then P(0) = 1 Else P(0) = P(0) / v
+          V = 1 / AdjustFactor
+            If P(0) < V Then P(0) = 1 Else P(0) = P(0) / V
             cumP(0) = P(0)
           For j = 1 To 255
-            If P(j) < v Then P(j) = 1 Else P(j) = P(j) / v
+            If P(j) < V Then P(j) = 1 Else P(j) = P(j) / V
             cumP(j) = cumP(j - 1) + P(j)
           Next j
           cumDiv = cumDiv + MaxProbAdjust
@@ -203,11 +203,11 @@ Sub Ari(InBytes() As Byte, OutBytes() As Byte, Optional Debugging As Boolean)
     If w < 6 Then w = 6
     ReDim Preserve OutBytes(w)
     
-    u = Int(n / 256)
-    OutBytes(3) = n - u * 256
-    n = u
-    u = Int(n / 256)
-    OutBytes(2) = n - u * 256
+    u = Int(N / 256)
+    OutBytes(3) = N - u * 256
+    N = u
+    u = Int(N / 256)
+    OutBytes(2) = N - u * 256
     OutBytes(1) = u
 
 End Sub
@@ -217,8 +217,8 @@ Sub Undo_Ari(InBytes() As Byte, OutBytes() As Byte, Optional Debugging As Boolea
     Dim cumStep&, cumDiv&
     Dim i As Long, j As Long, k As Long, bNo As Long, nBytes As Long
     Dim R As Double, w As Long
-    Dim u As Long, v As Single, y As Long, nW As Long
-    Dim n&, D As Double, rr As Double
+    Dim u As Long, V As Single, y As Long, nW As Long
+    Dim N&, D As Double, rr As Double
     Dim LastProbUpdate As Long
     Dim x As Single
 
@@ -226,8 +226,8 @@ Sub Undo_Ari(InBytes() As Byte, OutBytes() As Byte, Optional Debugging As Boolea
     
     nBytes = (CLng(InBytes(1)) * 256 + InBytes(2)) * 256 + InBytes(3)
     
-    n = UBound(InBytes)
-    nW = n * 2
+    N = UBound(InBytes)
+    nW = N * 2
     ReDim OutBytes(nBytes)
     
     'initialise cumulative probability array
@@ -262,7 +262,7 @@ Sub Undo_Ari(InBytes() As Byte, OutBytes() As Byte, Optional Debugging As Boolea
       Do While R <= B24
         R = R * 256
         i = i + 1
-        If i <= n Then
+        If i <= N Then
           D = D * 256 + InBytes(i)
         Else
           D = D * 256
@@ -280,11 +280,11 @@ Sub Undo_Ari(InBytes() As Byte, OutBytes() As Byte, Optional Debugging As Boolea
         'every 1000 or so steps, divide all the values by 2 to "age" them and give more weight to
         'subsequent items
         If cumStep > cumDiv Then 'age the stats
-          v = 1 / AdjustFactor
-            If P(0) < v Then P(0) = 1 Else P(0) = P(0) / v
+          V = 1 / AdjustFactor
+            If P(0) < V Then P(0) = 1 Else P(0) = P(0) / V
             cumP(0) = P(0)
           For j = 1 To 255
-            If P(j) < v Then P(j) = 1 Else P(j) = P(j) / v
+            If P(j) < V Then P(j) = 1 Else P(j) = P(j) / V
             cumP(j) = cumP(j - 1) + P(j)
           Next j
           cumDiv = cumDiv + MaxProbAdjust
@@ -312,16 +312,16 @@ Sub BTF(ByRef InBytes() As Byte, ByRef OutBytes() As Byte)
     Dim tPosString As String '* 256
     Dim tChr As String * 1
     Dim tPos(0 To 255) As Long
-    Dim n As Long
+    Dim N As Long
 
-    n = UBound(InBytes)
-    ReDim OutBytes(n)
+    N = UBound(InBytes)
+    ReDim OutBytes(N)
     
     For i = 0 To 255
       tPosString = tPosString & Chr$(i)
     Next i
     
-    For i = 1 To n
+    For i = 1 To N
       tChr = Chr$(InBytes(i))
       OutBytes(i) = InStr(tPosString, tChr) - 1
       CopyMemory ByVal StrPtr(tPosString) + 2, ByVal StrPtr(tPosString), OutBytes(i) * 2
@@ -329,7 +329,7 @@ Sub BTF(ByRef InBytes() As Byte, ByRef OutBytes() As Byte)
     Next i
     
     Erase tPos
-    For i = 1 To n
+    For i = 1 To N
       j = OutBytes(i)
       tPos(j) = tPos(j) + 1
     Next i
@@ -340,16 +340,16 @@ Sub Undo_BTF(ByRef InBytes() As Byte, ByRef OutBytes() As Byte)
     Dim tPosString As String '* 256
     Dim tChr As String * 1
     Dim tPos(0 To 255) As Integer
-    Dim n As Long
+    Dim N As Long
     
-    n = UBound(InBytes)
-    ReDim OutBytes(n)
+    N = UBound(InBytes)
+    ReDim OutBytes(N)
     
     For i = 0 To 255
       tPosString = tPosString & Chr$(i)
     Next i
     
-    For i = 1 To n
+    For i = 1 To N
       tChr = Mid$(tPosString, InBytes(i) + 1, 1)
       OutBytes(i) = Asc(tChr)
       CopyMemory ByVal StrPtr(tPosString) + 2, ByVal StrPtr(tPosString), InBytes(i) * 2
@@ -358,13 +358,13 @@ Sub Undo_BTF(ByRef InBytes() As Byte, ByRef OutBytes() As Byte)
 End Sub
 
 Sub BWT(ByRef InBytes() As Byte, ByRef OutBytes() As Byte)
-    Dim n&, u1&, u2&, u3&, u4&
-    n = UBound(InBytes)
+    Dim N&, u1&, u2&, u3&, u4&
+    N = UBound(InBytes)
     
-    If n > BWT_Chunk - 4 Then
+    If N > BWT_Chunk - 4 Then
       Dim B1() As Byte, B2() As Byte
-      Do While u2 < n
-        u2 = u1 + BWT_Chunk - 4: If u2 > n Then u2 = n
+      Do While u2 < N
+        u2 = u1 + BWT_Chunk - 4: If u2 > N Then u2 = N
         ReDim B1(u2 - u1)
         CopyMemory ByVal VarPtr(B1(1)), ByVal VarPtr(InBytes(u1 + 1)), (u2 - u1)
         SortByteArray B1(), B2()
@@ -384,12 +384,12 @@ Sub BWT(ByRef InBytes() As Byte, ByRef OutBytes() As Byte)
 End Sub
 
 Sub Undo_BWT(ByRef InBytes() As Byte, ByRef OutBytes() As Byte)
-    Dim n&, u1&, u2&, u3&, u4&
-    n = UBound(InBytes)
-    If n > BWT_Chunk Then
+    Dim N&, u1&, u2&, u3&, u4&
+    N = UBound(InBytes)
+    If N > BWT_Chunk Then
       Dim B1() As Byte, B2() As Byte
-      Do While u2 < n
-        u2 = u1 + BWT_Chunk: If u2 > n Then u2 = n
+      Do While u2 < N
+        u2 = u1 + BWT_Chunk: If u2 > N Then u2 = N
         ReDim B1(u2 - u1)
         CopyMemory ByVal VarPtr(B1(1)), ByVal VarPtr(InBytes(u1 + 1)), (u2 - u1)
         Decode_BWT B1(), B2()
@@ -409,13 +409,13 @@ Sub Undo_BWT(ByRef InBytes() As Byte, ByRef OutBytes() As Byte)
 End Sub
 
 Sub Decode_BWT(ByRef InBytes() As Byte, ByRef OutBytes() As Byte)
-    Dim i As Long, j As Long, t As Single
+    Dim i As Long, j As Long, T As Single
     Dim tStartByte As Long
-    Dim n As Long
+    Dim N As Long
     
-    n = UBound(InBytes)
-    ReDim OutBytes(n - 4)
-    ReDim sList(n)
+    N = UBound(InBytes)
+    ReDim OutBytes(N - 4)
+    ReDim sList(N)
     
     'get starting item, stored in first 4 bytes
     tStartByte = 0
@@ -428,7 +428,7 @@ Sub Decode_BWT(ByRef InBytes() As Byte, ByRef OutBytes() As Byte)
     
     Dim C1(0 To 255) As Long
     
-    For i = 5 To n
+    For i = 5 To N
       j = InBytes(i)
       C1(j) = C1(j) + 1
     Next i
@@ -437,14 +437,14 @@ Sub Decode_BWT(ByRef InBytes() As Byte, ByRef OutBytes() As Byte)
       C1(i) = C1(i) + C1(i - 1)
     Next i
     
-    For i = n To 5 Step -1
+    For i = N To 5 Step -1
       j = InBytes(i)
       sList(C1(j)) = i - 4
       C1(j) = C1(j) - 1
     Next i
     
     j = tStartByte
-    For i = 1 To n - 4
+    For i = 1 To N - 4
       OutBytes(i) = InBytes(sList(j) + 4)
       j = sList(j)
     Next i
@@ -490,48 +490,48 @@ End Function
 
 Function RLE(ByRef InBytes() As Byte, OutBytes() As Byte) As Long
     Dim i&, j&, m&
-    Dim C&, t&, u&
-    Dim n As Long
+    Dim c&, T&, u&
+    Dim N As Long
     
-    n = UBound(InBytes)
+    N = UBound(InBytes)
     
-    ReDim OutBytes(n * 1.5) As Byte
+    ReDim OutBytes(N * 1.5) As Byte
     
     j = 0
     
-    For i = 1 To n
+    For i = 1 To N
     
       j = j + 1
       OutBytes(j) = InBytes(i)
       
-      If InBytes(i) = C Then
+      If InBytes(i) = c Then
         
         m = -1
         
         Do
           m = m + 1
-          If i = n Then
+          If i = N Then
             Exit Do
           End If
           i = i + 1
           If m = 255 Then
             Exit Do
           End If
-        Loop While InBytes(i) = C
+        Loop While InBytes(i) = c
         
         If m >= 0 Then
           j = j + 1
           OutBytes(j) = m
         End If
         
-        If InBytes(i) <> C Or m = 255 Then
+        If InBytes(i) <> c Or m = 255 Then
           j = j + 1
           OutBytes(j) = InBytes(i)
         End If
         
       End If
       
-      C = InBytes(i)
+      c = InBytes(i)
     
     Next i
     
@@ -541,40 +541,40 @@ End Function
 
 Function Undo_RLE(ByRef InBytes() As Byte, OutBytes() As Byte) As Long
     Dim i&, j&, m&, k&
-    Dim C&, t&, u&
-    Dim n As Long
+    Dim c&, T&, u&
+    Dim N As Long
     
-    n = UBound(InBytes)
-    k = n * 3
+    N = UBound(InBytes)
+    k = N * 3
     ReDim tmp(k) As Byte
     
     j = 0
     
-    For i = 1 To n
+    For i = 1 To N
     
       j = j + 1
       If j > k Then
-        k = k + n
+        k = k + N
         ReDim Preserve tmp(k)
       End If
       tmp(j) = InBytes(i)
       
-      If InBytes(i) = C Then
+      If InBytes(i) = c Then
         'If i > 55 Then Stop
         i = i + 1
-        If i > n Then Exit For
+        If i > N Then Exit For
         u = InBytes(i)
         For m = 1 To u
           j = j + 1
           If j > k Then
-            k = k + n
+            k = k + N
             ReDim Preserve tmp(k)
           End If
-          tmp(j) = C
+          tmp(j) = c
         Next m
-        C = -1
+        c = -1
       Else
-        C = InBytes(i)
+        c = InBytes(i)
       End If
     
     Next i
@@ -589,7 +589,7 @@ End Function
 
 Sub SortByteArray(ByRef InBytes() As Byte, ByRef OutBytes() As Byte)
     Dim i As Long, j As Long, k As Long, StartGroup As Long, nCurrGroups As Long
-    Dim n As Long, m As Long, u As Long, v As Long, w As Long, z As Long, x As Long
+    Dim N As Long, m As Long, u As Long, V As Long, w As Long, z As Long, x As Long
     Dim aSize As Long, StartByte As Long
     
     nInBytes = UBound(InBytes)
@@ -604,8 +604,8 @@ Sub SortByteArray(ByRef InBytes() As Byte, ByRef OutBytes() As Byte)
     Erase C1
     For i = 1 To nInBytes - 1
       u = InBytes(i)
-      v = InBytes(i + 1)
-      C1(u, v) = C1(u, v) + 1
+      V = InBytes(i + 1)
+      C1(u, V) = C1(u, V) + 1
     Next i
     C1(InBytes(nInBytes), InBytes(1)) = C1(InBytes(nInBytes), InBytes(1)) + 1
     
@@ -636,12 +636,12 @@ Sub SortByteArray(ByRef InBytes() As Byte, ByRef OutBytes() As Byte)
     
     For i = nInBytes - 1 To 1 Step -1
       u = InBytes(i)
-      v = InBytes(i + 1)
-      w = C1(u, v)
+      V = InBytes(i + 1)
+      w = C1(u, V)
       SortList(w) = i
       OrigSort(i) = GroupOrder(w)
       w = w - 1
-      C1(u, v) = w
+      C1(u, V) = w
     Next i
     
     'make copy of original sort group list so we can update it
@@ -697,8 +697,8 @@ End Sub
 
 
 Function SortGroup(GroupNo As Long, Depth As Long) As Long
-    Dim i As Long, j As Long, k As Long, m As Long, g As Long, u As Long, v As Long, w As Long, z As Long
-    Dim Index As Long, Index2 As Long, FirstItem As Long, Distance As Long, Value As Long, NumEls As Long, OrigIndex As Long
+    Dim i As Long, j As Long, k As Long, m As Long, g As Long, u As Long, V As Long, w As Long, z As Long
+    Dim index As Long, Index2 As Long, FirstItem As Long, Distance As Long, value As Long, NumEls As Long, OrigIndex As Long
     
     FirstItem = GroupList(GroupNo)
     NumEls = GroupSize(GroupNo) - 1
@@ -711,11 +711,11 @@ Function SortGroup(GroupNo As Long, Depth As Long) As Long
     
     Do
       Distance = Distance \ 3
-      For Index = FirstItem + Distance To FirstItem + NumEls
-        Value = SortList(Index)
-        u = Value + Depth: Do While u > nInBytes: u = u - nInBytes: Loop
+      For index = FirstItem + Distance To FirstItem + NumEls
+        value = SortList(index)
+        u = value + Depth: Do While u > nInBytes: u = u - nInBytes: Loop
         z = OrigSort(u)
-        Index2 = Index
+        Index2 = index
         Do
           w = SortList(Index2 - Distance) + Depth: Do While w > nInBytes: w = w - nInBytes: Loop
           
@@ -724,7 +724,7 @@ Function SortGroup(GroupNo As Long, Depth As Long) As Long
           Index2 = Index2 - Distance
           If Index2 < FirstItem + Distance Then Exit Do
         Loop
-        SortList(Index2) = Value
+        SortList(Index2) = value
       Next
     Loop Until Distance <= 1
     
@@ -733,9 +733,9 @@ Function SortGroup(GroupNo As Long, Depth As Long) As Long
     u = OrigSort(u)
     z = 1
     For i = GroupList(GroupNo) + 1 To w
-      v = SortList(i) + Depth: Do While v > nInBytes: v = v - nInBytes: Loop
-      v = OrigSort(v)
-      If u = v Then
+      V = SortList(i) + Depth: Do While V > nInBytes: V = V - nInBytes: Loop
+      V = OrigSort(V)
+      If u = V Then
         z = z + 1
       Else
         If z > 1 Then
@@ -751,7 +751,7 @@ Function SortGroup(GroupNo As Long, Depth As Long) As Long
         End If
         z = 1
       End If
-      u = v
+      u = V
     Next i
     If z > 1 Then
       nNewGroups = nNewGroups + 1
