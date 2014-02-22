@@ -229,3 +229,84 @@ End Function
 Public Function QuotePath(ByVal path As String)
     QuotePath = Chr(34) & path & Chr(34)
 End Function
+
+
+'**
+'* Checks for the existence of resources into the obelix binary folder and download it from
+'* the specified URI if it not exists.
+'* <p> The name of the resource inside the URI must be specified using the string "$1"(without quotes)
+'* The string $1 will be replaced by the name of the resource, when a download is required.
+'*
+'* @param resources_uri_mask A URI that points to the location where the resources can be downloaded.
+'* @param resources_names The name of the resources the check.
+Public Function CheckBinaryResources(ByVal resources_uri_mask, ParamArray resources_names() As Variant)
+    Dim iterator_i As Integer
+    Dim resources_names_size As Long
+    Dim resource_name As String
+    Dim resource_path As String
+    Dim result As Boolean
+    
+    On Error GoTo Catch
+    
+    result = True
+    
+    If IsEmpty(resources_names) Then
+        GoTo Finally
+    End If
+    
+    resources_names_size = UBound(resources_names)
+    For iterator_i = 0 To resources_names_size ' ParamArray is always zero-based
+        resource_name = resources_names(iterator_i)
+        If Not obelix_io.ExistsInBin(resource_name) Then
+            result = obelix_net.GetBinaryFromWeb(FORMATARTEXTO(resources_uri_mask, resource_name & ".zip"), resources_names(iterator_i))
+            
+            ' we need to move the downloaded resource to the binary folder
+            ' removing the .zip extension
+            Name GetDownloadPathFor(resource_name) As GetBinPathFor(resource_name)
+        End If
+    Next iterator_i
+    
+    GoTo Finally
+    
+Catch:
+    ' log the error and propagate to the caller
+    LogError "[obelix_helper   CheckBinaryResources]   " & Err.Description
+    
+    Err.Raise Err.number, Err.Source, Err.Description, Err.HelpFile, Err.HelpContext
+    
+Finally:
+    CheckBinaryResources = result
+End Function
+
+'**
+'* Register the specified resource component againts the Windows Registry.
+'* <p>The component must be registrable COM Server and must be located into the obelix binary folder.
+'* The regsvrex app will be used to do the registration process and it must be location into the obelix
+'* folder too.
+'*
+'* @param resource_name The name of the resource to register.
+'*
+'* @return true if the registration process succeeds; otherwise false.
+Public Function RegisterBinary(ByVal resource_name As String) As Boolean
+    Dim resource_path As String
+    Dim regsvrex_path As String
+    Dim result As Double
+    
+    On Error GoTo Catch
+    
+    resource_path = obelix_io.GetBinPathFor(resource_name)
+    regsvrex_path = obelix_io.GetBinPathFor(kRegSvrExFileName)
+    
+    ' register the resource
+    result = Shell(FORMATARTEXTO("""$1"" /c ""$2""", regsvrex_path, resource_path))
+    
+    RegisterBinary = True
+    
+    GoTo Finally
+    
+Catch:
+    LogError "[obelix_helper   RegisterBinary]   " & Err.Description
+    RegisterBinary = False
+    
+Finally:
+End Function

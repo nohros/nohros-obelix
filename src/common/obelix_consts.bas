@@ -12,3 +12,16 @@ Public Const kCryptClassName As String = "cCrypt"
 Public Const kdhRichClientDLLName As String = "dhRichClient3.dll"
 Public Const kSQLiteFileName As String = kdhRichClientDLLName
 Public Const kdhDirectCOMDLLName As String = "DirectCOM.dll"
+
+'**
+'* Ensure that the pseudo constants variables are set.
+'*
+'* The SetConstants function implemented by this library on set the value of
+'* the kConstIsSet variable. Users of this library must add the others constants
+'* to the body of the SetConstants function.
+'*
+Public Sub EnsureConstants()
+    If kConstIsSet = Empty Then
+        SetConstants
+    End If
+End Sub
