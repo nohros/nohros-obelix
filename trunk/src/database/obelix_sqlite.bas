@@ -113,3 +113,31 @@ Catch:
     ReportError "MustSQLite->RefreshTable->SQL command:" & sql_command
 End Function
 
+'**
+'* Call the SQLQueryToArray function and pass the resulting array to the
+'* SQLiteTableFromArray method.
+'*
+Public Function SQLQueryToSQLite(ByVal mssql_command As String, ByVal mssql_connection As ADODB.Connection, _
+    ByVal sqlite_table_name As String, ByVal obelix_sqlite As ObelixSQLite) As Boolean
+    
+    Dim data_rows() As Variant
+    Dim data_fields() As String
+    Dim data_fields_types() As String
+    Dim result As Boolean
+    
+    On Error GoTo Catch
+    
+    result = SQLQueryToArray(mssql_command, mssql_connection, data_rows, data_fields, data_fields_types)
+    If result Then
+        result = obelix_sqlite.TableFromArray(sqlite_table_name, data_rows, data_fields, data_fields_types)
+    End If
+    
+    GoTo Finally
+    
+Catch:
+    result = False
+    LogError Err.Description
+Resume
+Finally:
+    SQLQueryToSQLite = result
+End Function
