@@ -112,7 +112,7 @@ Private Function ReadRecordSet(ByRef rs As Object) As String
         s = "NODATA"
     Else
         While Not rs.EOF
-            For Each f In rs.Fields
+            For Each f In rs.fields
                 If f.Attributes And adFldIsNullable And False Then
                     s = s + ";" + "NULL"
                 Else
@@ -570,13 +570,13 @@ Public Function SplitByValue(ByVal row As Integer, ByVal col As Integer)
         ' Loop for cells with same value
         Do While xlCell.Value = sheetName
             xlCell.EntireRow.Copy xbCell.EntireRow
-            Set xlCell = xlCell.offset(1, 0)
-            Set xbCell = xbCell.offset(1, 0)
+            Set xlCell = xlCell.Offset(1, 0)
+            Set xbCell = xbCell.Offset(1, 0)
         Loop
         wb.SaveAs sheetName
         wb.Close False, sheetName
         ' Goto next cell
-        Set xlCell = xlCell.offset(1, 0)
+        Set xlCell = xlCell.Offset(1, 0)
     Loop
 End Function
 

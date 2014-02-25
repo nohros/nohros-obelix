@@ -22,15 +22,15 @@ End Type
 '   2011.01.19 - neylor.silva
 '     Release
 Public Function SQLQueryToRange(ByVal sql_command_text As String, ByVal sql_connection_string As String, ByRef data_first_cell As Range, ParamArray command_parms() As Variant) As Integer
-    Dim sql_connection As ADODB.Connection
-    Dim sql_command As ADODB.Command
-    Dim sql_recordset As ADODB.Recordset
+    Dim sql_connection As ADOdb.Connection
+    Dim sql_command As ADOdb.Command
+    Dim sql_recordset As ADOdb.Recordset
     Dim no_of_columns As Integer
     Dim rows As Variant
     
     On Error GoTo Catch
     
-    Set sql_connection = New ADODB.Connection
+    Set sql_connection = New ADOdb.Connection
     sql_connection.Provider = "sqloledb" ' If the user has excel then it have this provider.
     sql_connection.ConnectionString = sql_connection_string
     
@@ -61,8 +61,8 @@ End Function
 '   2011.01.19 - neylor.silva
 '     Release
 Public Function SQLQueryToRange2(ByVal sql_command_text As String, ByVal sql_connection As Connection, ByRef data_first_cell As Range, ParamArray command_parms() As Variant) As Integer
-    Dim sql_command As ADODB.Command
-    Dim sql_recordset As ADODB.Recordset
+    Dim sql_command As ADOdb.Command
+    Dim sql_recordset As ADOdb.Recordset
     Dim no_of_columns As Integer
     Dim rows As Variant
     
@@ -107,16 +107,16 @@ End Function
 '   2011.01.19 - neylor.silva
 '     Release
 Public Function SQLQueryToArray(ByVal sql_command_text As String, ByVal sql_connection As Connection, ByRef rows() As Variant, ByRef fields() As String, ByRef fields_types() As String) As Boolean
-    Dim sql_command As ADODB.Command
-    Dim sql_recordset As ADODB.Recordset
+    Dim sql_command As ADOdb.Command
+    Dim sql_recordset As ADOdb.Recordset
     Dim no_of_columns As Integer
     Dim no_of_rows As Long
     Dim iterator_i As Long
-    Dim current_field As ADODB.Field
+    Dim current_field As ADOdb.Field
     
     On Error GoTo Catch
         
-    Set sql_command = New ADODB.Command
+    Set sql_command = New ADOdb.Command
     sql_command.CommandText = sql_command_text
     
     sql_command.ActiveConnection = sql_connection
@@ -157,9 +157,9 @@ Public Function SqlQueryScalar( _
     ByVal sql_connection As Connection, _
     ParamArray command_parms() As Variant) As Variant
 
-    Dim sql_recordset As ADODB.Recordset
+    Dim sql_recordset As ADOdb.Recordset
     Dim iterator_i As Long
-    Dim current_field As ADODB.Field
+    Dim current_field As ADOdb.Field
     
     On Error GoTo Catch
 
@@ -187,11 +187,11 @@ Private Function ExecuteSQLQuery( _
     ByVal sql_connection As Connection, _
     ParamArray command_parms() As Variant) As Recordset
 
-    Dim sql_command As ADODB.Command
+    Dim sql_command As ADOdb.Command
     
     On Error GoTo Catch
 
-    Set sql_command = New ADODB.Command
+    Set sql_command = New ADOdb.Command
     sql_command.CommandText = FormatarTexto(sql_command_text, command_parms)
     
     If sql_connection.State = adStateClosed Then
@@ -270,6 +270,7 @@ Public Function OpenConnection(ByVal connection_string As String) As Connection
     On Error GoTo Catch:
     
     Set OpenConnection = New Connection
+    OpenConnection.Provider = "sqloledb" ' If the user has excel then it have this provider.
     OpenConnection.Open connection_string
 
     GoTo Finally

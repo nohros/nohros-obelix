@@ -34,6 +34,11 @@ Public Function DeleteCellContextMenu()
 End Function
 
 Private Function SQLImport()
-    MsgBox "HAHAHA"
+    obelix.connection_string_ = Empty
+    frmConnection.Show
+    
+    If Not connection_string_ = Empty Then
+        frmImport.Show
+    End If
 End Function
 
