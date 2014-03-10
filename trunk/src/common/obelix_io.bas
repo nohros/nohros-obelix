@@ -90,7 +90,7 @@ Public Function CreateObelixDataFolderStructure() As Boolean
     GoTo Finally
     
 Catch:
-    LogError Err.Description
+    LogError Err
     
 Finally:
     CreateObelixDataFolderStructure = succeeded
@@ -121,9 +121,9 @@ Private Function CreateFolderIfNotExists(ByVal fs_object As FileSystemObject, By
     GoTo Finally
     
 Catch:
-    LogError Err.Description
+    LogError Err
     
-    Err.Raise Err.number, Err.Source, Err.Description, Err.HelpFile, Err.HelpContext
+    Err.Raise Err.number, Err.source, Err.Description, Err.HelpFile, Err.HelpContext
 Finally:
 End Function
 
@@ -258,7 +258,7 @@ Public Function CheckBinaryResources(ByVal resources_uri_mask, ParamArray resour
     For iterator_i = 0 To resources_names_size ' ParamArray is always zero-based
         resource_name = resources_names(iterator_i)
         If Not obelix_io.ExistsInBin(resource_name) Then
-            result = obelix_net.GetBinaryFromWeb(FORMATARTEXTO(resources_uri_mask, resource_name & ".zip"), resources_names(iterator_i))
+            result = obelix_net.GetBinaryFromWeb(FormatarTexto(resources_uri_mask, resource_name & ".zip"), resources_names(iterator_i))
             
             ' we need to move the downloaded resource to the binary folder
             ' removing the .zip extension
@@ -272,7 +272,7 @@ Catch:
     ' log the error and propagate to the caller
     LogError "[obelix_helper   CheckBinaryResources]   " & Err.Description
     
-    Err.Raise Err.number, Err.Source, Err.Description, Err.HelpFile, Err.HelpContext
+    Err.Raise Err.number, Err.source, Err.Description, Err.HelpFile, Err.HelpContext
     
 Finally:
     CheckBinaryResources = result
@@ -298,7 +298,7 @@ Public Function RegisterBinary(ByVal resource_name As String) As Boolean
     regsvrex_path = obelix_io.GetBinPathFor(kRegSvrExFileName)
     
     ' register the resource
-    result = Shell(FORMATARTEXTO("""$1"" /c ""$2""", regsvrex_path, resource_path))
+    result = Shell(FormatarTexto("""$1"" /c ""$2""", regsvrex_path, resource_path))
     
     RegisterBinary = True
     

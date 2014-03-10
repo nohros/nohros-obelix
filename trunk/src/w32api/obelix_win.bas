@@ -312,7 +312,7 @@ Public Function CreateRegFreeObject(ByVal com_class_name As String, ByVal com_dl
         ' the DirectCOM dll is not loaded, load it.
         direct_com_handle = LoadLibrary(direct_com_dll_path)
         If direct_com_handle = 0 Then
-            LogError "The DirectCOM dll could not be loaded."
+            Err.Raise vbError + 500, "CreateRegFreeObject", "The DirectCOM dll could not be loaded."
             GoTo Finally
         End If
     End If
@@ -327,7 +327,7 @@ Catch:
     Set com_object = Nothing
     result = False
     
-    LogError Err.Description
+    LogError Err
     
     ' propagate the erro to the caller
     'Err.Raise Err.number, Err.Source, Err.Description, Err.HelpFile, Err.HelpContext
@@ -347,4 +347,8 @@ Public Function Timing(Optional ByVal Start As Boolean) As Double
     
     If Start Then T = HPTimer: Exit Function
     Timing = HPTimer - T
+End Function
+
+Public Function FindWindow(ByVal lpClassName As String, ByVal lpWindowName As String) As Long
+    FindWindow = FindWindowA(lpClassName, lpWindowName)
 End Function
