@@ -116,7 +116,7 @@ Private Function ReadRecordSet(ByRef rs As Object) As String
                 If f.Attributes And adFldIsNullable And False Then
                     s = s + ";" + "NULL"
                 Else
-                    s = s + ";" + CStr(f.Value)
+                    s = s + ";" + CStr(f.value)
                 End If
             Next
             
@@ -447,10 +447,10 @@ End Function
 
 Function FuzzyMatch(Fstr As String, Sstr As String) As Double
     
-    Dim L, L1, L2, M, SC, t, R As Integer
+    Dim L, L1, L2, m, SC, T, R As Integer
    
     L = 0
-    M = 0
+    m = 0
     SC = 1
    
     L1 = Len(Fstr)
@@ -458,19 +458,19 @@ Function FuzzyMatch(Fstr As String, Sstr As String) As Double
    
     Do While L < L1
         L = L + 1
-        For t = SC To L1
-            If Mid$(Sstr, L, 1) = Mid$(Fstr, t, 1) Then
-                M = M + 1
-                SC = t
-                t = L1 + 1
+        For T = SC To L1
+            If Mid$(Sstr, L, 1) = Mid$(Fstr, T, 1) Then
+                m = m + 1
+                SC = T
+                T = L1 + 1
             End If
-        Next t
+        Next T
     Loop
    
     If L1 = 0 Then
         FuzzyMatch = 0
     Else
-        FuzzyMatch = M / L1
+        FuzzyMatch = m / L1
     End If
 
 End Function
@@ -562,13 +562,13 @@ Public Function SplitByValue(ByVal row As Integer, ByVal col As Integer)
     
     Set xlCell = ActiveSheet.Cells(row, col)
     ' Loop for each value cells
-    Do While xlCell.Value <> Empty
+    Do While xlCell.value <> Empty
         Set wb = Workbooks.Add
         Set sh = wb.Sheets(1)
         Set xbCell = sh.Range("A2")
         sheetName = xlCell.Text
         ' Loop for cells with same value
-        Do While xlCell.Value = sheetName
+        Do While xlCell.value = sheetName
             xlCell.EntireRow.Copy xbCell.EntireRow
             Set xlCell = xlCell.Offset(1, 0)
             Set xbCell = xbCell.Offset(1, 0)
@@ -765,7 +765,7 @@ Function MUDARCOR(ByVal cell As Range, ByVal color As Long, ParamArray parts() A
     Dim last_token_width As Long
     Dim i As Long
     
-    words = Split(cell.Value, " ")
+    words = Split(cell.value, " ")
     
     ReDim tokens(UBound(words))
     
@@ -818,7 +818,7 @@ End Function
 
 Public Function NomeDoMeio(name) As String
     Dim index As Integer
-    Dim index2 As Integer
+    Dim Index2 As Integer
     Dim trimmed As String
     
     trimmed = Trim(name)
