@@ -1,4 +1,4 @@
-Attribute VB_Name = "ObelixCompress"
+Attribute VB_Name = "obelix_compress"
 ' Copyright (c) 2010 Nohros Systems Inc.
 ' Copyright (c) 2003 Dermot Balson.
 '

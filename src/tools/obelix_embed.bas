@@ -1,4 +1,4 @@
-Attribute VB_Name = "ObelixEmbed"
+Attribute VB_Name = "obelix_embed"
 ' Copyright (c) 2010 by Nohros Systems Inc.
 ' Copyright (c) 2003 by Dermot Balson.
 '
