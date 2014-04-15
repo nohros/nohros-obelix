@@ -25,9 +25,9 @@ Private sqlConn As Object
 Public connection_string_ As String
 
 Public Type token
-    TokenBegin As Long
-    TokenEnd As Long
-    TokenWidth As Long
+  TokenBegin As Long
+  TokenEnd As Long
+  TokenWidth As Long
 End Type
 
 Function OpenSQLConnection()
@@ -63,40 +63,42 @@ Function CloseSQLConnection() As Boolean
     End If
 End Function
 
-Function GetFromSQL(ByVal sql As String, Optional closeConn As Boolean = True) As String
-    
-    On Error GoTo Catch:
-    
-    OpenSQLConnection
-    
-    Dim cmd As Object
-    Dim rs As Object
-    
-    Set cmd = CreateObject("ADODB.Command")
-    cmd.CommandType = adCmdText
-    
-    cmd.ActiveConnection = sqlConn
-    cmd.CommandText = sql
-    
-    Set rs = cmd.Execute
-    
-    GetFromSQL = ReadRecordSet(rs)
-    
-    DoEvents
-    
-    If closeConn Then
-        CloseSQLConnection
-    End If
-    
-    GoTo Finally
-
+Function GetFromSQL( _
+  ByVal sql As String, _
+  Optional closeConn As Boolean = True _
+) As String
+  
+  On Error GoTo Catch:
+  
+  OpenSQLConnection
+  
+  Dim cmd As Object
+  Dim rs As Object
+  
+  Set cmd = CreateObject("ADODB.Command")
+  cmd.CommandType = adCmdText
+  
+  cmd.ActiveConnection = sqlConn
+  cmd.CommandText = sql
+  
+  Set rs = cmd.Execute
+  
+  GetFromSQL = ReadRecordSet(rs)
+  
+  DoEvents
+  
+  If closeConn Then
+    CloseSQLConnection
+  End If
+  
+  GoTo Finally
+  
 Catch:
-    GetFromSQL = Err.Description
-    
+  GetFromSQL = Err.Description
+  
 Finally:
-    Set cmd = Nothing
-    Set rs = Nothing
-    
+  Set cmd = Nothing
+  Set rs = Nothing
 End Function
 
 Private Function ReadRecordSet(ByRef rs As Object) As String
@@ -105,11 +107,11 @@ Private Function ReadRecordSet(ByRef rs As Object) As String
     Dim f As Object
     
     If rs Is Nothing Then
-        s = "NODATA"
+        s = ";NODATA"
     ElseIf rs.State = adStateClosed Then
-        s = "NODATA"
+        s = ";NODATA"
     ElseIf rs.EOF Then
-        s = "NODATA"
+        s = ";NODATA"
     Else
         While Not rs.EOF
             For Each f In rs.fields
@@ -123,7 +125,7 @@ Private Function ReadRecordSet(ByRef rs As Object) As String
             rs.MoveNext ' next record
         Wend
     End If
-    ReadRecordSet = s
+    ReadRecordSet = Mid(s, 2, Len(s) - 1)
 End Function
 
 Private Function ClearConnectionString()
@@ -580,183 +582,6 @@ Public Function SplitByValue(ByVal row As Integer, ByVal col As Integer)
     Loop
 End Function
 
-
-'**
-'* Alinha os caracteres do texto especificado adicionando o caracter character_a_preencher
-'* a esquerda do texto a ser alinhado.
-'* <p> Se o tamanho do texto informado for menor do que o tamanho especificado e o campo
-'* remover_caracteres for verdadeio os caracteres mais a direita serão eliminados para que o
-'* texto atinja o tamanho especificado.
-'*
-'* @param texto Texto a ser alinhado.
-'* @param tamanho_final Tamanho final que o texto devera conter apos o alinhamento.
-'* @param caracter_a_preencher Caracter que sera adicionado a esquerda do texto.
-'* @param truncar Verdadeiro se o texto devera ser truncado caso o tamanho do texto seja maior do que o tamanho especificado;
-'*        falso em caso contrario.
-'*
-Function PreencherEsquerda(ByVal texto As String, ByVal caracter_a_preencher As String, ByVal tamanho_final As Integer, Optional truncar As Boolean)
-    Dim novo_texto As String
-    Dim quantidade_a_adicionar As Integer
-    
-    novo_texto = texto
-    
-    quantidade_a_adicionar = tamanho_final - Len(texto)
-    If quantidade_a_adicionar < 0 Then
-        If truncar Then
-            novo_texto = Mid(texto, 1, tamanho_final)
-        End If
-        GoTo Finally
-    End If
-
-    novo_texto = Replace(Space(quantidade_a_adicionar), " ", caracter_a_preencher) + novo_texto
-    
-Catch:
-Finally:
-    PreencherEsquerda = novo_texto
-End Function
-
-'**
-'* Alinha os caracteres do texto especificado adicionando o caracter character_a_preencher
-'* a direita do texto a ser alinhado.
-'* <p> Se o tamanho do texto informado for menor do que o tamanho especificado e o campo
-'* remover_caracteres for verdadeio os caracteres mais a direita serão eliminados para que o
-'* texto atinja o tamanho especificado.
-'*
-'* @param texto Texto a ser alinhado.
-'* @param tamanho_final Tamanho final que o texto devera conter apos o alinhamento.
-'* @param caracter_a_preencher Caracter que sera adicionado a direita do texto.
-'* @param truncar Verdadeiro se o texto devera ser truncado caso o tamanho do texto seja maior do que o tamanho especificado;
-'*        falso em caso contrario.
-'*
-Function PreencherDireita(ByVal texto As String, ByVal caracter_a_preencher As String, ByVal tamanho_final As Integer, Optional truncar As Boolean)
-    Dim novo_texto As String
-    Dim quantidade_a_adicionar As Integer
-    
-    novo_texto = texto
-    
-    quantidade_a_adicionar = tamanho_final - Len(texto)
-    If quantidade_a_adicionar < 0 Then
-        If truncar Then
-            novo_texto = Mid(texto, 1, tamanho_final)
-        End If
-        GoTo Finally
-    End If
-
-    novo_texto = novo_texto + Replace(Space(quantidade_a_adicionar), " ", caracter_a_preencher)
-    
-Catch:
-Finally:
-    PreencherDireita = novo_texto
-End Function
-
-'**
-'* Formata uma sequencia de caracteres substituindo cada elemento de formato
-'* no texto especificado pelo texto equivalente especificado.
-'* <p>
-'* Um formato e composto por um sinal de dolar mais um numero que identifica
-'* a ordem em que o texto correspondente aparece na sequencia de formatos.
-'* <p>
-'* Caso o numero que acompanha a definicao do formato nao exista na lista de
-'* textos correspondentes o formato sera substituido por um texto vazio. Por
-'* exemplo:
-'* <p>
-'*     =FORMATARTEXTO("Este texto possui o formato $1.", B2)
-'* <p>
-'* No exemplo acima o texto $1 sera substituido pelo texto existente na celula B2.
-'* <p>
-'* A lista de textos pode conter celulas ou textos explicitos.
-'*
-'* @param texto Texto composto a ser formatado
-'* @param formato Objetos contendo os formatos a serem aplicados.
-'* @return Copia do formato onde cada item de formato e substituido por seu texto correspondente.
-'*/
-Function FormatarTexto(ByVal texto As String, ParamArray formatos() As Variant)
-    Dim i As Long
-    Dim formats_size As Integer
-    Dim formated_text As String
-    Dim text_size As Integer
-    Dim tokens() As String
-    Dim ch As String
-    Dim format_token_position_string As String
-    Dim format_token_position As Integer
-    Dim is_digit As Boolean
-    Dim lower_bound As Integer
-    Dim formato() As Variant
-    Dim sub_formato() As Variant
-    Dim last_dimenssion As Integer
-        
-    formato = formatos
-    
-    ' checks if the format array is multidimensional
-    On Error GoTo Singl
-    For i = 0 To 60000
-        sub_formato = formato(0)
-        formato = sub_formato
-    Next i
-    
-Multi:
-    formato = formatos(0)
-    
-Singl:
-    On Error GoTo 0
-    
-    i = 1
-    formats_size = UBound(formato)
-    text_size = Len(texto)
-    
-    If formats_size = 0 Then
-        formated_text = texto
-        GoTo Finally
-    End If
-    
-    Do While i <= text_size
-        ch = Mid(texto, i, 1)
-        If ch = "$" Then
-            format_token_position_string = ""
-            i = i + 1
-            Do While i <= text_size
-                ch = Mid(texto, i, 1)
-                
-                is_digit = IsDigit(ch)
-                If is_digit Then
-                    format_token_position_string = ch & format_token_position_string
-                End If
-                
-                If Not is_digit Or i = text_size Then
-                    format_token_position = CInt(format_token_position_string) - 1
-                    If format_token_position <= formats_size Then
-                        formated_text = formated_text & CStr(formato(format_token_position)) + ch 'IIf(i = text_size, "", ch)
-                    Else
-                        formated_text = formated_text & "$" & CStr(format_token_position - formats_size) + ch
-                    End If
-                    
-                    ' if i is equals text size the last character must be appended to
-                    ' the formated text because after exit from here, [i] will be
-                    ' greater than the [text_size] and the code that appends
-                    ' non-digit characters to the formated text will not be called.
-                    'If i = text_size And Not is_digit Then
-                        'formated_text = formated_text & ch
-                    'End If
-                    
-                    Exit Do
-                End If
-                i = i + 1
-            Loop
-        Else
-            formated_text = formated_text & ch
-        End If
-        i = i + 1
-    Loop
-    
-    GoTo Finally
-    
-Catch:
-    formated_text = Err.Description
-    
-Finally:
-    FormatarTexto = formated_text
-End Function
-
 Function MUDARCOR(ByVal cell As Range, ByVal color As Long, ParamArray parts() As Variant)
     Dim words() As String
     Dim tokens() As token
@@ -790,19 +615,6 @@ Function MUDARCOR(ByVal cell As Range, ByVal color As Long, ParamArray parts() A
     MUDARCOR = cell.Value2
 End Function
 
-Function RGB(ByVal red As Integer, ByVal green As Integer, ByVal blue As Integer) As Long
-    RGB = VBA.Information.RGB(red, green, blue)
-End Function
-'**
-'* Concatena todos os elementos especificados, utilizando o separador entre cada elemento.
-'*
-'* @param separador Texto a ser utilizado como separador.
-'* @param elementos Elementos que serao concatenados
-Function Juntar(ByVal separador As String, ParamArray elementos() As Variant)
-    Juntar = Join(elementos, separador)
-End Function
-
-
 Function FirstSpaceIndex(name) As Integer
     FirstSpaceIndex = InStr(1, name, " ")
 End Function
@@ -833,7 +645,7 @@ Public Function UltimoNome(name) As String
     UltimoNome = StrReverse(PrimeiroNome(StrReverse(name)))
 End Function
 
-Public Function FixSize(name, size, expr, reverse) As String
+Public Function FixSize(ByVal name As String, ByVal size As Integer, ByVal expr As String, Optional ByVal reverse As Boolean = False) As String
     Dim trimmed
     Dim length
     Dim fixed
