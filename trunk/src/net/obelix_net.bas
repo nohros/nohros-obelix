@@ -66,3 +66,51 @@ Catch:
 Finally:
     Set xml_http_request = Nothing
 End Function
+
+'**
+'* Checks for the existence of resources into the obelix binary folder and download it from
+'* the specified URI if it not exists.
+'*
+'* <p> The name of the resource inside the URI must be specified using the string "$1"(without quotes)
+'* The string $1 will be replaced by the name of the resource, when a download is required.
+'*
+'* @param resources_uri_mask A URI that points to the location where the resources can be downloaded.
+'* @param resources_names The name of the resources the check.
+Public Function CheckBinaryResources(ByVal resources_uri_mask, ParamArray resources_names() As Variant)
+    Dim iterator_i As Integer
+    Dim resources_names_size As Long
+    Dim resource_name As String
+    Dim resource_path As String
+    Dim result As Boolean
+    
+    On Error GoTo Catch
+    
+    result = True
+    
+    If IsEmpty(resources_names) Then
+        GoTo Finally
+    End If
+    
+    resources_names_size = UBound(resources_names)
+    For iterator_i = 0 To resources_names_size ' ParamArray is always zero-based
+        resource_name = resources_names(iterator_i)
+        If Not obelix_io.ExistsInBin(resource_name) Then
+            result = obelix_net.GetBinaryFromWeb(FormatarTexto(resources_uri_mask, resource_name & ".zip"), resources_names(iterator_i))
+            
+            ' we need to move the downloaded resource to the binary folder
+            ' removing the .zip extension
+            Name GetDownloadPathFor(resource_name) As GetBinPathFor(resource_name)
+        End If
+    Next iterator_i
+    
+    GoTo Finally
+    
+Catch:
+    ' log the error and propagate to the caller
+    LogError "[obelix_helper   CheckBinaryResources]   " & Err.Description
+    
+    Err.Raise Err.number, Err.source, Err.Description, Err.HelpFile, Err.HelpContext
+    
+Finally:
+    CheckBinaryResources = result
+End Function

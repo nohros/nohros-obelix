@@ -17,5 +17,12 @@ Public Function LogError(ByVal error As ErrObject)
 End Function
 
 Public Function Throw(ByVal Err As ErrObject)
-    Err.Raise Err.number, Err.source, Err.Description, Err.HelpFile, Err.HelpContext
+    Err.Raise Err.Number, Err.source, Err.Description, Err.HelpFile, Err.HelpContext
+End Function
+
+Public Function Finally(ByVal Err As ErrObject)
+  If Err.Number <> 0 Then
+    On Error GoTo 0
+    Throw Err
+  End If
 End Function
