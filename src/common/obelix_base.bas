@@ -55,10 +55,10 @@ Singl:
     formats_size = UBound(formato)
     text_size = Len(texto)
     
-    If formats_size = 0 Then
-        formated_text = texto
-        GoTo Finally
-    End If
+    'If formats_size = 0 Then
+    '    formated_text = texto
+    '    GoTo Finally
+    'End If
     
     Do While i <= text_size
         ch = Mid(texto, i, 1)
@@ -99,13 +99,73 @@ Singl:
         i = i + 1
     Loop
     
-    GoTo Finally
+    GoTo finally
     
-Catch:
+catch:
     formated_text = Err.Description
     
-Finally:
+finally:
     FormatarTexto = formated_text
+End Function
+
+' Formata uma sequencia de caracteres substituindo cada elemento de formato
+' no texto especificado pelo texto equivalente especificado.
+'
+' Um formato e composto por um sinal de dolar mais um numero que identifica
+' a ordem em que o texto correspondente aparece na sequencia de formatos.
+'
+' Caso o numero que acompanha a definicao do formato nao exista na lista de
+' textos correspondentes o formato sera substituido por um texto vazio. Por
+' exemplo:
+'
+'   =formatarTexto("Este texto possui o formato $1.", B2)
+'
+' No exemplo acima o texto $1 sera substituido pelo texto existente na celula B2.
+'
+' A lista de textos pode conter celulas ou textos explicitos.
+'
+' @param texto Texto composto a ser formatado
+' @param formato Objetos contendo os formatos a serem aplicados.
+' @return Copia do formato onde cada item de formato e substituido por seu texto correspondente.
+Public Function FormatarTextoF(ByVal texto As String, ParamArray formatos() As Variant) As String
+  Dim i As Long
+  Dim formats_size As Integer
+  Dim formated_text As String
+  Dim formato() As Variant
+  Dim sub_formato() As Variant
+        
+  formato = formatos
+  
+  ' checks if the format array is multidimensional
+  On Error GoTo Singl
+  For i = 0 To 60000
+    sub_formato = formato(0)
+    formato = sub_formato
+  Next i
+    
+Multi:
+    formato = formatos(0)
+    
+Singl:
+  On Error GoTo 0
+  
+  i = 1
+  formats_size = UBound(formato)
+  
+  formated_text = texto
+  For i = 0 To formats_size
+    formated_text = Replace(formated_text, "$" & i + 1, CStr(formato(i)))
+  Next i
+  
+  FormatarTextoF = formated_text
+  
+  GoTo finally
+
+catch:
+    formated_text = Err.Description
+    
+finally:
+    FormatarTextoF = formated_text
 End Function
 
 '**
@@ -139,13 +199,13 @@ Public Function PreencherEsquerda( _
       novo_texto = Mid(texto, 1, tamanho_final)
     End If
     
-    GoTo Finally
+    GoTo finally
   End If
   
   novo_texto = Replace(Space(quantidade_a_adicionar), " ", caracter_a_preencher) + novo_texto
 
-Catch:
-Finally:
+catch:
+finally:
   PreencherEsquerda = novo_texto
 End Function
 
@@ -180,13 +240,13 @@ Function PreencherDireita( _
       novo_texto = Mid(texto, 1, tamanho_final)
     End If
     
-    GoTo Finally
+    GoTo finally
   End If
   
   novo_texto = novo_texto + Replace(Space(quantidade_a_adicionar), " ", caracter_a_preencher)
   
-Catch:
-Finally:
+catch:
+finally:
   PreencherDireita = novo_texto
 End Function
 
@@ -228,5 +288,37 @@ Function IsDigit(ByVal ch As String) As Boolean
   Dim asc_code As Integer
   
   asc_code = Asc(ch)
-  IsDigit = (asc_code > 48 And asc_code < 58)
+  IsDigit = (asc_code > 47 And asc_code < 58)
+End Function
+
+Public Function MaiorSequencia( _
+  ByVal rng As Range, _
+  ByVal pattern As Variant) As Integer
+
+  On Error GoTo catch
+
+  Dim data As Variant
+  Dim count As Long
+  
+  data = rng.Resize(, 1).Value2
+  
+  MaiorSequencia = 0
+  
+  count = 1
+  For i = 2 To UBound(data)
+    If (data(i, 1) = pattern And data(i - 1, 1) = pattern) Then
+      count = count + 1
+    Else
+      If (count > MaiorSequencia) Then
+        MaiorSequencia = count
+      End If
+      count = 1
+    End If
+  Next i
+
+  GoTo finally
+
+catch:
+  MaiorSequencia = -1
+finally:
 End Function
