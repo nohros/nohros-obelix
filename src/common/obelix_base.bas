@@ -108,66 +108,6 @@ finally:
     FormatarTexto = formated_text
 End Function
 
-' Formata uma sequencia de caracteres substituindo cada elemento de formato
-' no texto especificado pelo texto equivalente especificado.
-'
-' Um formato e composto por um sinal de dolar mais um numero que identifica
-' a ordem em que o texto correspondente aparece na sequencia de formatos.
-'
-' Caso o numero que acompanha a definicao do formato nao exista na lista de
-' textos correspondentes o formato sera substituido por um texto vazio. Por
-' exemplo:
-'
-'   =formatarTexto("Este texto possui o formato $1.", B2)
-'
-' No exemplo acima o texto $1 sera substituido pelo texto existente na celula B2.
-'
-' A lista de textos pode conter celulas ou textos explicitos.
-'
-' @param texto Texto composto a ser formatado
-' @param formato Objetos contendo os formatos a serem aplicados.
-' @return Copia do formato onde cada item de formato e substituido por seu texto correspondente.
-Public Function FormatarTextoF(ByVal texto As String, ParamArray formatos() As Variant) As String
-  Dim i As Long
-  Dim formats_size As Integer
-  Dim formated_text As String
-  Dim formato() As Variant
-  Dim sub_formato() As Variant
-        
-  formato = formatos
-  
-  ' checks if the format array is multidimensional
-  On Error GoTo Singl
-  For i = 0 To 60000
-    sub_formato = formato(0)
-    formato = sub_formato
-  Next i
-    
-Multi:
-    formato = formatos(0)
-    
-Singl:
-  On Error GoTo 0
-  
-  i = 1
-  formats_size = UBound(formato)
-  
-  formated_text = texto
-  For i = 0 To formats_size
-    formated_text = Replace(formated_text, "$" & i + 1, CStr(formato(i)))
-  Next i
-  
-  FormatarTextoF = formated_text
-  
-  GoTo finally
-
-catch:
-    formated_text = Err.Description
-    
-finally:
-    FormatarTextoF = formated_text
-End Function
-
 '**
 '* Alinha os caracteres do texto especificado adicionando o caracter character_a_preencher
 '* a esquerda do texto a ser alinhado.
@@ -288,7 +228,7 @@ Function IsDigit(ByVal ch As String) As Boolean
   Dim asc_code As Integer
   
   asc_code = Asc(ch)
-  IsDigit = (asc_code > 47 And asc_code < 58)
+  IsDigit = (asc_code > 48 And asc_code < 58)
 End Function
 
 Public Function MaiorSequencia( _
@@ -322,3 +262,62 @@ catch:
   MaiorSequencia = -1
 finally:
 End Function
+
+Public Function TaxaComposta( _
+  ByVal rngTax As Range, _
+  Optional ByVal rngFilter As Range = Nothing, _
+  Optional ByVal filter As Variant = Nothing) As Double
+
+  Dim taxes As Variant
+  Dim filters As Variant
+  
+  Dim data() As Double
+  Dim result As Double
+  Dim i As Long
+  Dim j As Long
+  
+  taxes = rngTax.Value2
+  
+  If IsArray(taxes) Then
+    ReDim data(UBound(taxes) - 1)
+  Else
+    TaxaComposta = taxes
+    Exit Function
+  End If
+  
+  If Not rngFilter Is Nothing Then
+    filters = rngFilter.Value2
+  End If
+  
+  i = 1
+  j = 0
+  If Not rngFilter Is Nothing Then
+    For Each tax In taxes
+      If filter = filters(i, 1) Then
+        data(j) = tax
+        j = j + 1
+      End If
+      i = i + 1
+    Next tax
+  Else
+    For Each tax In taxes
+      data(j) = tax
+      j = j + 1
+      i = i + 1
+    Next tax
+  End If
+  
+  If j > 0 Then
+    ReDim Preserve data(j - 1)
+  
+    result = 1
+    For i = 0 To j - 1
+      result = (1 + data(i)) * result
+    Next i
+    
+    TaxaComposta = result - 1
+  Else
+    TaxaComposta = 0
+  End If
+End Function
+
