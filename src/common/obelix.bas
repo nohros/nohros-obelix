@@ -32,7 +32,7 @@ End Type
 
 Function OpenSQLConnection()
 
-    On Error GoTo Catch:
+    On Error GoTo catch:
     
     If sqlConn Is Nothing Then
         Set sqlConn = CreateObject("ADODB.Connection")
@@ -47,12 +47,12 @@ Function OpenSQLConnection()
         sqlConn.Open connection_string_
     End If
     
-    GoTo Finally
+    GoTo finally
     
-Catch:
+catch:
     connection_string_ = Empty
     
-Finally:
+finally:
 End Function
 
 Function CloseSQLConnection() As Boolean
@@ -68,7 +68,7 @@ Function GetFromSQL( _
   Optional closeConn As Boolean = True _
 ) As String
   
-  On Error GoTo Catch:
+  On Error GoTo catch:
   
   OpenSQLConnection
   
@@ -91,12 +91,12 @@ Function GetFromSQL( _
     CloseSQLConnection
   End If
   
-  GoTo Finally
+  GoTo finally
   
-Catch:
+catch:
   GetFromSQL = Err.Description
   
-Finally:
+finally:
   Set cmd = Nothing
   Set rs = Nothing
 End Function

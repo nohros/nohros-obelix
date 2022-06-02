@@ -18,5 +18,5 @@ Public Const kdhRichClientDLLName As String = "dhRichClient3.dll"
 Public Const kSQLiteFileName As String = kdhRichClientDLLName
 Public Const kdhDirectCOMDLLName As String = "DirectCOM.dll"
 
-Public Const kSGridFileName As String = "vbalSGrid6.ocx"
+Public Const kSGridFileName As String = "vbalGrid6.ocx"
 Public Const kSSubFileName As String = "SSubTmr6.dll"

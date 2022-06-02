@@ -3,7 +3,7 @@ Attribute VB_Name = "obelix_logger"
 #Const STOP_WHILE_DEBUGING_ = False
 
 Public Function ReportError(ByVal error As ErrObject)
-    MsgBox error.Description
+  MsgBox error.Description, vbExclamation
 End Function
 
 Public Function LogError(ByVal error As ErrObject)
@@ -17,12 +17,11 @@ Public Function LogError(ByVal error As ErrObject)
 End Function
 
 Public Function Throw(ByVal Err As ErrObject)
-    Err.Raise Err.Number, Err.source, Err.Description, Err.HelpFile, Err.HelpContext
+  Err.Raise Err.Number, Err.Source, Err.Description, Err.HelpFile, Err.HelpContext
 End Function
 
-Public Function Finally(ByVal Err As ErrObject)
+Public Function ThrowIfNeeded(ByVal Err As ErrObject)
   If Err.Number <> 0 Then
-    On Error GoTo 0
     Throw Err
   End If
 End Function

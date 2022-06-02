@@ -49,7 +49,7 @@ Public Function CreateObelixDataFolderStructure() As Boolean
     Dim folders_struct() As String
     Dim iterator_i As Integer
     
-    On Error GoTo Catch
+    On Error GoTo catch
     
     ' pessimistic, false until true
     succeeded = False
@@ -87,12 +87,12 @@ Public Function CreateObelixDataFolderStructure() As Boolean
         End If
     Next iterator_i
     
-    GoTo Finally
+    GoTo finally
     
-Catch:
+catch:
     LogError Err
     
-Finally:
+finally:
     CreateObelixDataFolderStructure = succeeded
     
     Set fs_object = Nothing
@@ -108,7 +108,7 @@ End Function
 '*
 '* @return true if no erros has been occurred. otherwise false.
 Private Function CreateFolderIfNotExists(ByVal fs_object As FileSystemObject, ByVal folder_path As String) As Boolean
-    On Error GoTo Catch
+    On Error GoTo catch
     
     CreateFolderIfNotExists = False
     
@@ -118,13 +118,13 @@ Private Function CreateFolderIfNotExists(ByVal fs_object As FileSystemObject, By
     
     CreateFolderIfNotExists = True
     
-    GoTo Finally
+    GoTo finally
     
-Catch:
+catch:
     LogError Err
     
-    Err.Raise Err.number, Err.source, Err.Description, Err.HelpFile, Err.HelpContext
-Finally:
+    Err.Raise Err.Number, Err.Source, Err.Description, Err.HelpFile, Err.HelpContext
+finally:
 End Function
 
 '**
@@ -137,7 +137,7 @@ Public Function SaveBinary(ByVal file_name As String, ByRef binary_data() As Byt
     Dim fs_object As FileSystemObject
     Dim file_handle As Long
     
-    On Error GoTo Catch
+    On Error GoTo catch
     
     SaveBinary = False
     
@@ -152,8 +152,8 @@ Public Function SaveBinary(ByVal file_name As String, ByRef binary_data() As Byt
     
     SaveBinary = True
     
-Catch:
-Finally:
+catch:
+finally:
     Close #file_handle
 End Function
 
@@ -230,59 +230,49 @@ Public Function QuotePath(ByVal path As String)
     QuotePath = Chr(34) & path & Chr(34)
 End Function
 
-
 '**
-'* Checks for the existence of resources into the obelix binary folder and download it from
-'* the specified URI if it not exists.
-'* <p> The name of the resource inside the URI must be specified using the string "$1"(without quotes)
-'* The string $1 will be replaced by the name of the resource, when a download is required.
+'* Register the specified resource component againts the Windows Registry.
 '*
-'* @param resources_uri_mask A URI that points to the location where the resources can be downloaded.
-'* @param resources_names The name of the resources the check.
-Public Function CheckBinaryResources(ByVal resources_uri_mask, ParamArray resources_names() As Variant)
-    Dim iterator_i As Integer
-    Dim resources_names_size As Long
-    Dim resource_name As String
-    Dim resource_path As String
-    Dim result As Boolean
-    
-    On Error GoTo Catch
-    
-    result = True
-    
-    If IsEmpty(resources_names) Then
-        GoTo Finally
-    End If
-    
-    resources_names_size = UBound(resources_names)
-    For iterator_i = 0 To resources_names_size ' ParamArray is always zero-based
-        resource_name = resources_names(iterator_i)
-        If Not obelix_io.ExistsInBin(resource_name) Then
-            result = obelix_net.GetBinaryFromWeb(FormatarTexto(resources_uri_mask, resource_name & ".zip"), resources_names(iterator_i))
-            
-            ' we need to move the downloaded resource to the binary folder
-            ' removing the .zip extension
-            Name GetDownloadPathFor(resource_name) As GetBinPathFor(resource_name)
-        End If
-    Next iterator_i
-    
-    GoTo Finally
-    
-Catch:
-    ' log the error and propagate to the caller
-    LogError "[obelix_helper   CheckBinaryResources]   " & Err.Description
-    
-    Err.Raise Err.number, Err.source, Err.Description, Err.HelpFile, Err.HelpContext
-    
-Finally:
-    CheckBinaryResources = result
-End Function
+'* <p>The component must be registrable COM Server and must be located into the obelix binary folder.
+'* The regsvrex app will be used to do the registration process and it must be located into the obelix
+'* binary folder.
+'*
+'* @param resources_names The name of the resources the register.
+Public Sub RegisterBinaries(ParamArray resources_names() As Variant)
+  Dim iterator_i As Integer
+  Dim resources_names_size As Long
+  Dim resource_name As String
+  Dim resource_path As String
+  Dim result As Boolean
+  
+  On Error GoTo catch
+  
+  If IsEmpty(resources_names) Then
+      GoTo finally
+  End If
+  
+  resources_names_size = UBound(resources_names)
+  For iterator_i = 0 To resources_names_size ' ParamArray is always zero-based
+      resource_name = resources_names(iterator_i)
+      If obelix_io.ExistsInBin(resource_name) Then
+        RegisterBinary resource_name
+      End If
+  Next iterator_i
+  
+  GoTo finally
+  
+catch:
+  LogError Err
+  Throw Err
+  
+finally:
+End Sub
 
 '**
 '* Register the specified resource component againts the Windows Registry.
 '* <p>The component must be registrable COM Server and must be located into the obelix binary folder.
-'* The regsvrex app will be used to do the registration process and it must be location into the obelix
-'* folder too.
+'* The regsvrex app will be used to do the registration process and it must be located into the obelix
+'* binary folder.
 '*
 '* @param resource_name The name of the resource to register.
 '*
@@ -292,21 +282,21 @@ Public Function RegisterBinary(ByVal resource_name As String) As Boolean
     Dim regsvrex_path As String
     Dim result As Double
     
-    On Error GoTo Catch
+    On Error GoTo catch
     
     resource_path = obelix_io.GetBinPathFor(resource_name)
     regsvrex_path = obelix_io.GetBinPathFor(kRegSvrExFileName)
     
     ' register the resource
-    result = Shell(FormatarTexto("""$1"" /c ""$2""", regsvrex_path, resource_path))
+    result = Shell(FormatarTexto("""$1"" /c ""$2""", regsvrex_path, resource_path), vbHide)
     
     RegisterBinary = True
     
-    GoTo Finally
+    GoTo finally
     
-Catch:
-    LogError "[obelix_helper   RegisterBinary]   " & Err.Description
+catch:
+    LogError Err
     RegisterBinary = False
     
-Finally:
+finally:
 End Function

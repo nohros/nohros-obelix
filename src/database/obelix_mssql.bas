@@ -28,7 +28,7 @@ Public Function SQLQueryToRange(ByVal sql_command_text As String, ByVal sql_conn
     Dim no_of_columns As Integer
     Dim rows As Variant
     
-    On Error GoTo Catch
+    On Error GoTo catch
     
     Set sql_connection = New ADOdb.Connection
     sql_connection.Provider = "sqloledb" ' If the user has excel then it have this provider.
@@ -36,12 +36,12 @@ Public Function SQLQueryToRange(ByVal sql_command_text As String, ByVal sql_conn
     
     SQLQueryToRange2 sql_command_text, sql_connection, data_first_cell, command_parms
     
-    GoTo Finally
+    GoTo finally
 
-Catch:
+catch:
     ReportError Err
 
-Finally:
+finally:
     If Not sql_connection Is Nothing Then
         If sql_connection.State = adStateOpen Then _
             sql_connection.Close
@@ -66,7 +66,7 @@ Public Function SQLQueryToRange2(ByVal sql_command_text As String, ByVal sql_con
     Dim no_of_columns As Integer
     Dim rows As Variant
     
-    On Error GoTo Catch
+    On Error GoTo catch
 
     Set sql_recordset = ExecuteSQLQuery(sql_command_text, sql_connection, _
         command_parms)
@@ -74,14 +74,14 @@ Public Function SQLQueryToRange2(ByVal sql_command_text As String, ByVal sql_con
     ' copy the data to the range
     data_first_cell.CopyFromRecordset sql_recordset
     
-    GoTo Finally
+    GoTo finally
     
-Catch:
+catch:
     LogError Err
 
-Finally:
+finally:
     CloseRecordset sql_recordset
-    If Err.number <> 0 Then Throw Err
+    If Err.Number <> 0 Then Throw Err
 End Function
 
 ' Executes a SQL command and store the data into a worksheet starting at the specified cell
@@ -114,7 +114,7 @@ Public Function SQLQueryToArray(ByVal sql_command_text As String, ByVal sql_conn
     Dim iterator_i As Long
     Dim current_field As ADOdb.Field
     
-    On Error GoTo Catch
+    On Error GoTo catch
         
     Set sql_command = New ADOdb.Command
     sql_command.CommandText = sql_command_text
@@ -124,7 +124,7 @@ Public Function SQLQueryToArray(ByVal sql_command_text As String, ByVal sql_conn
     
     If Not sql_recordset.EOF Then
         ' get the field nams from the resulted data set
-        no_of_columns = sql_recordset.fields.Count
+        no_of_columns = sql_recordset.fields.count
         ReDim fields(no_of_columns)
         ReDim fields_types(no_of_columns)
         
@@ -141,15 +141,15 @@ Public Function SQLQueryToArray(ByVal sql_command_text As String, ByVal sql_conn
         SQLQueryToArray = False
     End If
     
-    GoTo Finally
+    GoTo finally
     
-Catch:
+catch:
     LogError Err
     
-Finally:
-    Set sql_recordset = Nothing
+finally:
+  Set sql_recordset = Nothing
     
-If Err.number <> 0 Then Throw Err
+  ThrowIfNeeded Err
 End Function
 
 Public Function SqlQueryScalar( _
@@ -161,7 +161,7 @@ Public Function SqlQueryScalar( _
     Dim iterator_i As Long
     Dim current_field As ADOdb.Field
     
-    On Error GoTo Catch
+    On Error GoTo catch
 
     Set sql_recordset = ExecuteSQLQuery(sql_command_text, sql_connection, command_parms)
     
@@ -171,15 +171,15 @@ Public Function SqlQueryScalar( _
         SqlQueryScalar = Nothing
     End If
     
-    GoTo Finally
+    GoTo finally
     
-Catch:
+catch:
     LogError Err
     
-Finally:
+finally:
     CloseRecordset sql_recordset
     
-    If Err.number <> 0 Then Throw Err
+    If Err.Number <> 0 Then Throw Err
 End Function
 
 Private Function ExecuteSQLQuery( _
@@ -189,7 +189,7 @@ Private Function ExecuteSQLQuery( _
 
     Dim sql_command As ADOdb.Command
     
-    On Error GoTo Catch
+    On Error GoTo catch
 
     Set sql_command = New ADOdb.Command
     sql_command.CommandText = FormatarTexto(sql_command_text, command_parms)
@@ -201,13 +201,13 @@ Private Function ExecuteSQLQuery( _
     sql_command.ActiveConnection = sql_connection
     Set ExecuteSQLQuery = sql_command.Execute
     
-    GoTo Finally
+    GoTo finally
     
-Catch:
+catch:
     LogError Err
     Throw Err
     
-Finally:
+finally:
 End Function
 
 Public Function SetAllConnectionsTo(ByRef mssql_connection_commands() As SQLConnectionCommand, ByVal mssql_connection As Object)
@@ -253,33 +253,33 @@ End Function
 ' @connection_string The string that contains the information used to connect to
 '                    a database server.
 Public Function CreateConnection(ByVal connection_string As String) As Connection
-    On Error GoTo Catch:
+    On Error GoTo catch:
     
     Set CreateConnection = New Connection
     CreateConnection.ConnectionString = connection_string
     
-    GoTo Finally
+    GoTo finally
     
-Catch:
+catch:
     LogError Err
     
-Finally:
+finally:
 End Function
 
 Public Function OpenConnection(ByVal connection_string As String) As Connection
-    On Error GoTo Catch:
-    
-    Set OpenConnection = New Connection
-    OpenConnection.Provider = "sqloledb" ' If the user has excel then it have this provider.
-    OpenConnection.Open connection_string
-
-    GoTo Finally
-    
-Catch:
-    LogError Err
-    Throw Err
-    
-Finally:
+  On Error GoTo catch:
+  
+  Set OpenConnection = New Connection
+  OpenConnection.Provider = "sqloledb" ' If the user has excel then it have this provider.
+  OpenConnection.Open connection_string
+  
+  GoTo finally
+  
+catch:
+  LogError Err
+  
+finally:
+  ThrowIfNeeded Err
 End Function
 
 
@@ -300,10 +300,10 @@ Public Function RangeToSQL(ByVal table_name As String, _
     
     RangeToSQL = False ' Pesimist. false until true
     
-    On Error GoTo Catch
+    On Error GoTo catch
     
-    no_of_columns = data_range.Columns.Count
-    no_of_rows = data_range.rows.Count
+    no_of_columns = data_range.Columns.count
+    no_of_rows = data_range.rows.count
         
     ' reads the data into memory to avoid communication overhead
     in_memory_column_names = data_range.Resize(1) ' gets the column names
@@ -342,11 +342,11 @@ Public Function RangeToSQL(ByVal table_name As String, _
     
     RangeToSQL = True
     
-    GoTo Finally
+    GoTo finally
     
-Catch:
+catch:
     LogError Err
     Throw Err
     
-Finally:
+finally:
 End Function

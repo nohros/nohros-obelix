@@ -195,39 +195,80 @@ Sub Demap(inB() As Byte, outB() As Byte)
 End Sub
 
 Function WriteEmbedToDisk(ByVal container As Workbook, ByVal name As String, ByVal BASE_PATH As String)
-    Dim embed_sheet As Worksheet
-    Dim data_column As Range
-    Dim i As Long
-    Dim data() As Byte
-    Dim data_name As String
+  Dim embed_sheet As Worksheet
+  Dim data_column As Range
+  Dim i As Long
+  Dim data() As Byte
+  Dim data_name As String
+  
+  Set embed_sheet = container.Sheets("MUSTOLE")
+  
+  For Each data_column In embed_sheet.Columns
+    data_name = StrConv(data_column.Cells(1, 1).value, vbLowerCase)
+    If data_name = Empty Then
+        Exit For
+    End If
     
-    Set embed_sheet = container.Sheets("MUSTOLE")
-    
-    For Each data_column In embed_sheet.Columns
-        data_name = StrConv(data_column.Cells(1, 1).value, vbLowerCase)
-        If data_name = Empty Then _
-            Exit For
-        
-        If StrConv(name, vbLowerCase) = data_name Or IsEmpty(name) Then
-            data = RecoverData(embed_sheet, True, data_column.Column)
-            WriteToDisk data_name, data, BASE_PATH
-        End If
-    Next data_column
+    If StrConv(name, vbLowerCase) = data_name Or IsEmpty(name) Then
+      data = RecoverData(embed_sheet, True, data_column.Column)
+      WriteToDisk data_name, data, BASE_PATH
+    End If
+  Next data_column
 End Function
 
 Public Function WriteToDisk(ByVal file_name As String, ByRef data() As Byte, ByVal BASE_PATH)
-    Dim fs As FileSystemObject
-    Dim file_path As String
-    Dim file_stream As TextStream
-   
-    Set fs = New FileSystemObject
-    file_path = fs.BuildPath(BASE_PATH, file_name)
-    
-    ' Create the file on the disk
-    Set file_stream = fs.CreateTextFile(file_path, True)
-        
-    ' Convert the binary data to string and write them to the file
-    file_stream.Write StrConv(data, vbUnicode)
-        
-    file_stream.Close
+  Dim fs As FileSystemObject
+  Dim file_path As String
+  Dim file_stream As TextStream
+  
+  Set fs = New FileSystemObject
+  file_path = fs.BuildPath(BASE_PATH, file_name)
+  
+  ' Create the file on the disk
+  Set file_stream = fs.CreateTextFile(file_path, True)
+      
+  ' Convert the binary data to string and write them to the file
+  file_stream.Write StrConv(data, vbUnicode)
+      
+  file_stream.Close
 End Function
+
+'**
+'* Checks for the existence of resources into the obelix binary folder and extract it from
+'* the given workbook if it not exists.
+'*
+'* <p> The resource should be embedded in the given workbook and the embedding should be done
+'* through the EmbedData method.
+'*
+'* @param resources_uri_mask A URI that points to the location where the resources can be downloaded.
+'* @param resources_names The name of the resources the check.
+Public Sub CheckBinaryResources(ByVal container As Workbook, ParamArray resources_names() As Variant)
+  Dim iterator_i As Integer
+  Dim resources_names_size As Long
+  Dim resource_name As String
+  Dim resource_path As String
+  Dim result As Boolean
+  
+  On Error GoTo catch
+  
+  If IsEmpty(resources_names) Then
+      GoTo finally
+  End If
+  
+  resources_names_size = UBound(resources_names)
+  For iterator_i = 0 To resources_names_size ' ParamArray is always zero-based
+      resource_name = resources_names(iterator_i)
+      If Not obelix_io.ExistsInBin(resource_name) Then
+        WriteEmbedToDisk container, resource_name, obelix_io.GetBinPath
+      End If
+  Next iterator_i
+  
+  GoTo finally
+  
+catch:
+  LogError Err
+  Throw Err
+  
+finally:
+End Sub
+

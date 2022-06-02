@@ -2,7 +2,7 @@ VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmConnection 
    Caption         =   " String de Conexão"
    ClientHeight    =   2520
-   ClientLeft      =   45
+   ClientLeft      =   50
    ClientTop       =   330
    ClientWidth     =   3810
    OleObjectBlob   =   "frmConnection.frx":0000
@@ -60,7 +60,7 @@ End Sub
 
 Private Sub LoadDatabases()
     
-    On Error GoTo Catch
+    On Error GoTo catch
     
     Dim connection_string As String
     Dim sql_connection As Connection
@@ -69,7 +69,7 @@ Private Sub LoadDatabases()
     Dim fields_types() As String
     
     If Len(server_) = 0 Or Len(login_) = 0 Or Len(password_) = 0 Then
-        GoTo Finally
+        GoTo finally
     End If
     
     database.Enabled = False
@@ -86,10 +86,10 @@ Private Sub LoadDatabases()
         database.List = Application.Transpose(rows)
     End If
     
-Catch:
+catch:
     'LogError Err
     
-Finally:
+finally:
     obelix_mssql.CloseConnection sql_connection
     database.Enabled = True
 End Sub

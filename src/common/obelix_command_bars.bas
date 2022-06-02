@@ -11,9 +11,9 @@ Public Function CreateCellContextMenu()
     Call DeleteCellContextMenu
     
     Set context_menu = Application.CommandBars(kCellCommandBar)
-    Set context_menu_controls = context_menu.Controls
+    Set context_menu_controls = context_menu.controls
     
-    With context_menu_controls.Add(Type:=msoControlButton, before:=context_menu_controls.Count + 1)
+    With context_menu_controls.Add(Type:=msoControlButton, before:=context_menu_controls.count + 1)
         .OnAction = "'" & ThisWorkbook.name & "'!" & "SQLImport"
         .FaceId = 0
         .Caption = "Import to SQL..."
@@ -26,7 +26,7 @@ Public Function DeleteCellContextMenu()
    Dim control As CommandBarControl
    
    Set context_menu = Application.CommandBars(kCellCommandBar)
-   For Each control In context_menu.Controls
+   For Each control In context_menu.controls
     If control.Tag = kSQLCommandBar Then
         control.Delete
     End If
